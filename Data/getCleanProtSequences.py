@@ -7,10 +7,10 @@ from Bio import SeqIO
 species = ("Mepe", "Usho", "Usbr", "Usma", "Spsc", "Sprz", "Sprs")
 AA = ("A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y", "*")
 
-# First list all protein sequences that do not start with "M" or have non-terminal stop codons.
+# First, list all protein sequences that do not start with "M" or have non-terminal stop codons.
 count1 = 0
 count2 = 0
-with open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/InvalidSequences.csv", "w") as out_file:
+with open("/path/to/data/Data/InvalidSequences.csv", "w") as out_file:
     out_file.write("Species,Gene\n")
     for s in species:
         seq = open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/" + s + "/" + s + "_prot_raw.fa")
@@ -29,7 +29,7 @@ with open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/InvalidSequ
 countNonAA = 0
 nonAA = []
 for s in species:
-    seq = open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/" + s + "/" + s + "_prot_raw.fa")
+    seq = open("/path/to/data/Data/" + s + "/" + s + "_prot_raw.fa")
     records = SeqIO.parse(seq, "fasta")
     for record in records:
         r = str(record.seq)
@@ -44,9 +44,9 @@ for s in species:
 count_all = 0
 for s in ("Usbr", "Usho", "Usma", "Spsc", "Sprz"):
     count_record = 0
-    with open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/" + s + "/" + s + "ChangedGeneIds.csv", "w") as out_file:
+    with open("/path/to/data/Data/" + s + "/" + s + "ChangedGeneIds.csv", "w") as out_file:
         out_file.write("GeneIdOld,GeneIdOldShort,GeneIdNew\n")
-        seq = open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/" + s + "/" + s + "_prot_raw.fa")
+        seq = open("/path/to/data/Data/" + s + "/" + s + "_prot_raw.fa")
         records = SeqIO.parse(seq, "fasta")
         for record in records:
             count_record += 1
@@ -54,8 +54,8 @@ for s in ("Usbr", "Usho", "Usma", "Spsc", "Sprz"):
             new = s + "_" + ("0000" + str(count_record))[-4:]
             out_file.write(old + "," + old.split("@")[1]  +  "," +  new + "\n")
     count_record2 = 0
-    with open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/" + s + "/" + s + "_valid_prot.fa", "w") as out_file:
-        seq = open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/" + s + "/" + s + "_prot_raw.fa")
+    with open("/path/to/data/Data/" + s + "/" + s + "_valid_prot.fa", "w") as out_file:
+        seq = open("/path/to/data/Data/" + s + "/" + s + "_prot_raw.fa")
         records2 = SeqIO.parse(seq, "fasta")
         for record2 in records2:
             count_record2 += 1
@@ -71,9 +71,9 @@ for s in ("Usbr", "Usho", "Usma", "Spsc", "Sprz"):
 
 for s in ("Mepe", "Sprs"):
     count_record = 0
-    with open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/" + s + "/" + s + "ChangedGeneIds.csv", "w") as out_file:
+    with open("/path/to/data/Data/" + s + "/" + s + "ChangedGeneIds.csv", "w") as out_file:
         out_file.write("GeneIdOld,GeneIdOldShort,GeneIdNew\n")
-        seq = open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/" + s + "/" + s + "_prot_raw.fa")
+        seq = open("/path/to/data/Data/" + s + "/" + s + "_prot_raw.fa")
         records = SeqIO.parse(seq, "fasta")
         for record in records:
             count_record += 1
@@ -81,8 +81,8 @@ for s in ("Mepe", "Sprs"):
             new = s + "_" + ("0000" + str(count_record))[-4:]
             out_file.write(old + "," + old  +  "," +  new + "\n")
     count_record2 = 0
-    with open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/" + s + "/" + s + "_valid_prot.fa", "w") as out_file:
-        seq = open("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Data/" + s + "/" + s + "_prot_raw.fa")
+    with open("/path/to/data/Data/" + s + "/" + s + "_valid_prot.fa", "w") as out_file:
+        seq = open("/path/to/data/Data/" + s + "/" + s + "_prot_raw.fa")
         records2 = SeqIO.parse(seq, "fasta")
         for record2 in records2:
             count_record2 += 1
@@ -94,7 +94,7 @@ for s in ("Mepe", "Sprs"):
                 else:
                     out_file.write(">" + new2 + "\n" + str(record2.seq) + "\n")
 
-# In total, 47927 sequences have been writen to files.
+# In total, 47927 sequences have been written to files.
 # For each species: 
 # Mepe: 6868; Usho: 7085; Usma: 6754; Usbr: 7225;
 # Spsc: 6685; Sprz: 6656; Sprs: 6654
