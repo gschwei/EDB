@@ -5,8 +5,7 @@
 
 from Bio import SeqIO
 
-
-path = "/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Analysis/Secretion/"
+path = "/path/to/Analysis/Secretion/"
 with open(path + "MergedSecretome.fa", "w") as out_file:
     seq_all = []
     species = ("Mepe", "Usbr", "Usho", "Usma", "Spsc", "Sprs", "Sprz")
