@@ -1,13 +1,13 @@
 # created by Gabriel on 22/02/17
 # last modified by Gabriel on 11/07/17 # add Sprs as additional species
 
-# Analyze the output of SignalP, TMHMM, Phobius and PSScan.
+# Analyze the output of SignalP, TMHMM, Phobius, and PSScan.
 
-species<-"Usma"#c("Mepe", "Usbr", "Usho", "Usma", "Spsc", "Sprs", "Sprz")
+species<-c("Mepe", "Usbr", "Usho", "Usma", "Spsc", "Sprs", "Sprz")
 for (spec in species) {
   tts<-numeric()
   tps<-numeric()
-  s<-read.table(paste("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Analysis/Secretion/", spec, "/", spec, "_signalp.txt", sep=""), stringsAsFactors=FALSE)
+  s<-read.table(paste("/path/to/Analysis/Secretion/", spec, "/", spec, "_signalp.txt", sep=""), stringsAsFactors=FALSE)
   s<-s[, c(1,5,10)] # column 5 is Y-score
   colnames(s)<-c("Gene", "CS", "Desc")
   
