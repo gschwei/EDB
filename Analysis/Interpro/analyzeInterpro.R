@@ -1,105 +1,204 @@
-# created by Gabriel on 07/03/17
-# last modified by Gabriel on 07/03/17
+# created by Gabriel on 02/08/17
+# last modified by Gabriel on 02/08/17
 
-intp1<-read.table("/home/schweizerg/Science-Data/Genomes/FungalGenomes5/Analysis/Interpro/InterproScanAll.txt", stringsAsFactors=FALSE, quote="", sep="\t")
-intp2<-read.table("/home/schweizerg/Science-Data/Genomes/FungalGenomes5/Analysis/Interpro/InterproScanAll2.txt", stringsAsFactors=FALSE, quote="", sep="\t")
-intp<-rbind(intp1, intp2)
-intp<-intp[, c(1,4,5,6)]
-colnames(intp)<-c("GeneIdNew", "Predictor", "ProfileId", "ProfileDesc")
+# Here, I parse the output of Interpro scan predictions to see which protein has a functional domain.
 
-fam_comp<-read.table("/home/schweizerg/Science-Data/Genomes/FungalGenomes5/Analysis/Homology/OrthoMCL/TestSettings/RefFamilies/Parse2/GetFamilies/FamilyComposition.csv", stringsAsFactors=FALSE, sep=" ", header=TRUE)
-fam_comp<-merge(fam_comp, intp, by="GeneIdNew", all.x=TRUE)
+ips<-read.table("/path/to/Analysis/Interpro/InterproScanAllOut_mod.txt", stringsAsFactors=FALSE, sep="@", quote="")
+ips2<-ips[, c(1,4,5,7,8)]
+colnames(ips2)<-c("GeneIdNew", "PredSoftware", "ProfileId", "DomainStart", "DomainEnd")
 
-core<-subset(fam_comp, CoreFamily == "yes")
+fam<-read.table("/path/to/Analysis/Homology/OrthoMCL/FamilyComposition.csv", stringsAsFactors=FALSE, sep=",", header=TRUE)
 
-unique_core<-core[!duplicated(core[6:8]), ]
-write.table(unique_core, file="/home/schweizerg/Science-Data/Genomes/FungalGenomes5/Analysis/Interpro/UniqueCore.txt", sep="%%", quote=FALSE, row.names=FALSE)
+core_fam<-subset(fam, NrSpecies == 7)$Family
+gras_fam<-subset(fam, NrSpecies == 6 & Mepe == 0)$Family
+nrow(subset(fam, NrSpecies == 2 & Sprz > 0 & Usma > 0)) # there are no "maize-specific" families.
 
-# The data in unique_core were manually analyzed to check which predicted domain is really functional. Now the result of this
-# analysis is opend and combined with the other information.
+library(seqinr)
 
-unique_core_fun<-read.table("/home/schweizerg/Science-Data/Genomes/FungalGenomes5/Analysis/Interpro/UniqueCore.csv", stringsAsFactors=FALSE, sep=";", header=TRUE)
-core<-merge(core, unique_core_fun, by="ProfileId", all.x=TRUE)
-
-# now get families with members without domain, with domain and mixed.
-
-fam<-character()
-domain<-character()
-for (f in unique(core$Family)) {
-  fam<-c(fam, f)
-  x<-numeric()
-  sub<-subset(core, Family == f)
-  for (m in unique(sub$GeneIdNew)) {
-    sub_mem<-subset(sub, GeneIdNew == m)
-    if (sum(sub_mem$Function == "yes", na.rm=TRUE) > 0) {
-      x<-c(x, 1)
-    } else {
-      x<-c(x, 0)
-    }
-  }
-  if (sum(x) == length(unique(sub$GeneIdNew))) {
-    domain<-c(domain, "dom")
-  } else if (sum(x) == 0) {
-    domain<-c(domain, "nod")
-  } else {
-    domain<-c(domain, "mix")
+mem<-character()
+unit<-character()
+for (i in 1:398) {
+  x<-character()
+  f<-character()
+  y<-character()
+  x<-x<-unlist(strsplit(paste("0000", i, sep=""), ""))
+  y<-paste(x[(length(x)-2):length(x)], collapse="")
+  f<-paste("FAM_", y, sep="")
+  seqs<-read.fasta(paste("/path/to/Analysis/Homology/OrthoMCL/Family/", f, ".fa", sep=""))
+  for (n in attr(seqs, "name")) {
+    unit<-c(unit, f)
+    mem<-c(mem, n)
   }
 }
-fam_dom<-data.frame(Family=fam, Domain=domain, stringsAsFactors=FALSE)
-core<-merge(core, fam_dom, by="Family", all.x=TRUE)
-write.table(core, file="/home/schweizerg/Science-Data/Genomes/FungalGenomes5/Analysis/Interpro/InterproInfoCore.txt", quote=FALSE, sep="|", row.names=FALSE)
+famcomp<-data.frame(Family=unit, GeneIdNew=mem, stringsAsFactors=FALSE)
 
 
-# we have many families of mixed type. Therefore, I give a closer look at those. If half of the members agree on one domain type, we consider this
-# family to be functional.
-# Which families are those [analysis of this question was done manually. Read the result here:]
+id<-list()
+for (s in c("Mepe", "Usbr", "Usho", "Usma", "Spsc", "Sprs", "Sprz")) {
+  id[[s]]<-read.table(paste("/path/to/Data/", s, "/", s, "ChangedGeneIds.csv", sep=""), stringsAsFactors=FALSE, sep=",", header=TRUE)
+}
+id_all<-rbind(id$Mepe, id$Usbr, id$Usho, id$Usma, id$Spsc, id$Sprs, id$Sprz)
+id_all<-id_all[, 2:3]
+famcomp<-merge(famcomp, id_all, by="GeneIdNew", all.x=TRUE)
 
-mix_fam_res<-read.table("/home/schweizerg/Science-Data/Genomes/FungalGenomes5/Analysis/Interpro/MixedFamilyResult.csv", stringsAsFactors=FALSE, sep=";", header=TRUE)
-
-fam2<-character()
-dom2<-character()
-for (f in unique(core$Family)) {
-  fam2<-c(fam2, f)
-  if (subset(core, Family == f)$Domain[1] == "dom") {
-    dom2<-c(dom2, "yes")
-  } else if (subset(core, Family == f)$Domain[1] == "nod") {
-    dom2<-c(dom2, "no")
-  } else if (subset(core, Family == f)$Domain[1] == "mix") {
-    if (subset(mix_fam_res, Family == f)$Domain == "dom") {
-      dom2<-c(dom2, "yes")
-    } else if (subset(mix_fam_res, Family == f)$Domain == "nod") {
-      dom2<-c(dom2, "no")
-    } else {
-      dom2<-c(dom2, NA)
-    }
+gs<-character()
+co<-character()
+u<-character()
+for (k in unique(famcomp$Family)) {
+  u<-c(u, k)
+  if (k %in% gras_fam) {
+    gs<-c(gs, "yes")
   } else {
-    dom2<-c(dom2, NA)
+    gs<-c(gs, "no")
+  }
+  if (k %in% core_fam) {
+    co<-c(co, "yes")
+  } else {
+    co<-c(co, "no")
   }
 }
-df2<-data.frame(Family=fam2, Domain2=dom2)
-core<-merge(core, df2, by="Family", all.x=TRUE)
-write.csv(core, file="/home/schweizerg/Science-Data/Genomes/FungalGenomes5/Analysis/Interpro/CoreInfo.csv")
-# some numbers:
-length(unique(subset(core, Domain2 == "yes")$Family)) # 79
-length(unique(subset(core, Domain2 == "no")$Family)) # 50
-# known effectors with domain:
-unique(subset(core, Domain2 == "yes" & !(is.na(EffectorName)))$EffectorName)
-# "pep4"   "exg1-1" "exg1-2" "egl1"   "s15-3"  "hum2"   "hum3"   "rrm67"  "gas1"   "prb1"   "cmu1"   "pit4"   "suc2"   "rsp2"   "mrpl19"
-unique(subset(core, Domain2 == "no" & !(is.na(EffectorName)))$EffectorName)
-# "eff1-8"  "eff1-9"  "eff1-4"  "eff1-7"  "eff1-11" "eff1-10" "eff1-2"  "eff1-3"  "eff1-1"  "rep1"    "stp2"    "apB73"   "rsp3"    "rsp1"   "stp3"    "pep1"    "pit2"    "see1"    "stp1" 
+df<-data.frame(Family=u, Core=co, GrasSpec=gs, stringsAsFactors=FALSE)
+famcomp<-merge(famcomp, df, by="Family", all.x=TRUE)
 
-# Nr prots with domain in each species
-sum(substr(unique(subset(core, Domain2 == "yes")$GeneIdNew), 1, 4) == "Mepe") # 134
-sum(substr(unique(subset(core, Domain2 == "yes")$GeneIdNew), 1, 4) == "Usbr") # 133
-sum(substr(unique(subset(core, Domain2 == "yes")$GeneIdNew), 1, 4) == "Usho") # 141
-sum(substr(unique(subset(core, Domain2 == "yes")$GeneIdNew), 1, 4) == "Usma") # 149
-sum(substr(unique(subset(core, Domain2 == "yes")$GeneIdNew), 1, 4) == "Spsc") # 145
-sum(substr(unique(subset(core, Domain2 == "yes")$GeneIdNew), 1, 4) == "Spre") # 142
+famcomp<-merge(famcomp, ips2, by="GeneIdNew", all.x=TRUE)
+ip1<-subset(famcomp, Core == "yes")$ProfileId
+ip2<-subset(famcomp, GrasSpec == "yes")$ProfileId
+ip_sel<-unique(c(ip1, ip2))
 
-# Nr prots without domain in each species
-sum(substr(unique(subset(core, Domain2 == "no")$GeneIdNew), 1, 4) == "Mepe") # 65
-sum(substr(unique(subset(core, Domain2 == "no")$GeneIdNew), 1, 4) == "Usbr") # 76
-sum(substr(unique(subset(core, Domain2 == "no")$GeneIdNew), 1, 4) == "Usho") # 67
-sum(substr(unique(subset(core, Domain2 == "no")$GeneIdNew), 1, 4) == "Usma") # 75
-sum(substr(unique(subset(core, Domain2 == "no")$GeneIdNew), 1, 4) == "Spsc") # 84
-sum(substr(unique(subset(core, Domain2 == "no")$GeneIdNew), 1, 4) == "Spre") # 86
+dom_info1<-read.table("/path/to/Analysis/Interpro/UniqueCore.csv", stringsAsFactors=FALSE, sep=";", header=TRUE)
+ip_check<-ip_sel[!(ip_sel %in% dom_info1$ProfileId)]
+write.table(ip_check, file="/path/to/Analysis/Interpro/DomainCheck.txt", quote=FALSE, row.names=FALSE)
+
+dom_info2<-read.table("/path/to/Analysis/Interpro/DomainDecision.csv", stringsAsFactors=FALSE, sep=";", header=TRUE)
+colnames(dom_info2)<-c("ProfileId", "Function")
+dom_info<-rbind(dom_info1, dom_info2)
+
+candidates<-subset(famcomp, Core == "yes" | GrasSpec == "yes")
+
+func<-character()
+for (j in 1:nrow(candidates)) {
+  if (is.na(candidates[j, "ProfileId"])) {
+    func<-c(func, "no")
+  } else {
+    func<-c(func, subset(dom_info, ProfileId == candidates[j, "ProfileId"])$Function)
+  }
+}
+candidates["Function"]<-func
+
+sq<-character()
+dom<-character()
+
+for (d in unique(candidates$GeneIdNew)) {
+  sq<-c(sq, d)
+  sub<-subset(candidates, GeneIdNew == d)
+  if ("yes" %in% sub$Function) {
+    dom<-c(dom, "yes")
+  } else {
+    dom<-c(dom, "no")
+  }
+}
+df_dom<-data.frame(GeneIdNew=sq, Function2=dom, stringsAsFactors=FALSE)
+
+candidates<-merge(candidates, df_dom, by="GeneIdNew", all.x=TRUE)
+
+gr<-character()
+dt<-character()
+for (e in unique(candidates$Family)) {
+  gr<-c(gr, e)
+  sub<-subset(candidates, Family == e)
+  if (sum(sub$Function2 == "yes") == nrow(sub)) {
+    dt<-c(dt, "Domain")
+  } else if (sum(sub$Function2 == "no") == nrow(sub)) {
+    dt<-c(dt, "NoDomain")
+  } else {
+    dt<-c(dt, "Mix")
+  }
+}
+
+df_dt<-data.frame(Family=gr, Domain=dt)
+
+candidates<-merge(candidates, df_dt, by="Family", all.x=TRUE)
+
+
+# get a table only with U. maydis entries:
+um_cand<-subset(candidates, substr(GeneIdNew, 1, 4) == "Usma")
+
+umf<-character()
+umdt<-character()
+for (e in unique(um_cand$Family)) {
+  umf<-c(umf, e)
+  sub<-subset(um_cand, Family == e)
+  if (sum(sub$Function2 == "yes") == nrow(sub)) {
+    umdt<-c(umdt, "Domain")
+  } else if (sum(sub$Function2 == "no") == nrow(sub)) {
+    umdt<-c(umdt, "NoDomain")
+  } else {
+    umdt<-c(umdt, "Mix")
+  }
+}
+um_df_dt<-data.frame(Family=umf, Domain2=umdt, stringsAsFactors=FALSE)
+
+um_cand<-merge(um_cand, um_df_dt, by="Family", all.x=TRUE)
+
+um<-character()
+cl<-character()
+umn<-numeric()
+umd<-character()
+umt<-character()
+
+for (p in unique(um_cand$Family)) {
+  cl<-c(cl, p)
+  um_sub<-subset(um_cand, Family == p)
+  um<-c(um, paste(unique(um_sub$GeneIdOldShort), collapse=";"))
+  umn<-c(umn, length(unique(um_sub$GeneIdOldShort)))
+  umd<-c(umd, unique(um_sub$Domain2))
+  if (unique(um_sub$Core) == "yes") {
+    umt<-c(umt, "Core")
+  }
+  if (unique(um_sub$GrasSpec) == "yes") {
+    umt<-c(umt, "GrassSpec")
+  }
+}
+um_tbl<-data.frame(Family=cl, NrUmGenes=umn, UmGenes=um, DomainType=umd, Selection=umt, stringsAsFactors=FALSE)
+write.table(um_tbl, file="/path/to/Analysis/Interpro/UmSummary.txt", quote=FALSE, row.names=FALSE, sep=",")
+
+# Now I add to each gene ID old short in candidates the information whether the gene has a functional domain or not.
+
+mt<-character()
+for (k in 1:nrow(candidates)) {
+  if (candidates[k, "Function2"] == "yes") {
+    mt<-c(mt, paste(candidates[k, "GeneIdOldShort"], "@wd", sep=""))
+  } else {
+    mt<-c(mt, paste(candidates[k, "GeneIdOldShort"], "@nd", sep=""))
+  }
+}
+candidates["GeneIdOldShortDom"]<-mt
+write.table(candidates, file="/path/to/Analysis/Interpro/Candidates.txt", quote=FALSE, sep=";", row.names=FALSE)
+
+
+xx<-unique(subset(candidates, Core == "yes")$Family)
+yy<-unique(subset(candidates, GrasSpec == "yes")$Family)
+
+sel<-character()
+grop<-character()
+for (i in 1:398) {
+  x<-character()
+  f<-character()
+  y<-character()
+  x<-x<-unlist(strsplit(paste("0000", i, sep=""), ""))
+  y<-paste(x[(length(x)-2):length(x)], collapse="")
+  f<-paste("FAM_", y, sep="")
+  grop<-c(grop, f)
+  if (f %in% xx) {
+    sel<-c(sel, "core")
+  } else if (f %in% yy) {
+    sel<-c(sel, "grass-specific")
+  } else {
+    sel<-c(sel, "accessory")
+  }
+}
+df_zzz<-data.frame(Family=grop, Type=sel, stringsAsFactors=FALSE)
+fc<-read.table("/path/to/Analysis/Homology/OrthoMCL/FamilyComposition.csv", stringsAsFactors=FALSE, sep=",", header=TRUE)
+fc<-merge(fc, df_zzz, by="Family")
+
+write.table(fc, file="/path/to/Analysis/Homology/OrthoMCL/GroupSummary.txt", quote=FALSE, row.names=FALSE)
