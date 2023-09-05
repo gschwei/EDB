@@ -11,7 +11,7 @@ for (spec in species) {
   s<-s[, c(1,5,10)] # column 5 is Y-score
   colnames(s)<-c("Gene", "CS", "Desc")
   
-  t<-read.table(paste("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Analysis/Secretion/", spec, "/", spec, "_TMHMM.txt", sep=""), stringsAsFactors=FALSE)
+  t<-read.table(paste("/path/to/Analysis/Secretion/", spec, "/", spec, "_TMHMM.txt", sep=""), stringsAsFactors=FALSE)
   t<-t[, c(1,5,6)]
   colnames(t)<-c("Gene", "PredHelT", "TopologyT")
   t["NrTMT"]<-as.integer(sapply(strsplit(t$PredHelT, "="), function(x) x[[2]]))
@@ -40,7 +40,7 @@ for (spec in species) {
   t["TMTMaxStart"]<-as.integer(tts)
   t<-t[, c(1,5)]
   
-  p<-read.table(paste("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Analysis/Secretion/", spec, "/", spec, "_phobius_ChangedFormat.csv", sep=""), stringsAsFactors=FALSE, sep=",")
+  p<-read.table(paste("/path/to/Analysis/Secretion/", spec, "/", spec, "_phobius_ChangedFormat.csv", sep=""), stringsAsFactors=FALSE, sep=",")
   for (j in 1:nrow(p)) {
     if (p[j, "V2"] > 0 & p[j, "V3"] == 0) {
       m<-unlist(strsplit(p[j, "V4"], "-"))
@@ -71,11 +71,11 @@ for (spec in species) {
   p["TMPMaxStart"]<-as.integer(tps)
   p<-p[, c(1,5)]
   
-  er_seqs<-read.table(paste("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Analysis/Secretion/", spec, "/", spec, "_PSScan.txt", sep=""), stringsAsFactors=FALSE, sep=",")$V1
+  er_seqs<-read.table(paste("/path/to/Analysis/Secretion/", spec, "/", spec, "_PSScan.txt", sep=""), stringsAsFactors=FALSE, sep=",")$V1
   
   summary<-merge(s, t, by="Gene")
   all<-merge(summary, p, by="Gene")
   sec<-subset(all, Desc == "Y" & TMTMaxStart < CS & TMPMaxStart < CS & !(Gene %in% er_seqs))
   rownames(sec)<-NULL
-  write(sec$Gene, file=paste("/home/schweizerg/Science-Data/Genomes/FungalGenomes6/Analysis/Secretion/", spec, "/", spec, "_Secretome.txt", sep=""))
+  write(sec$Gene, file=paste("/path/to/Analysis/Secretion/", spec, "/", spec, "_Secretome.txt", sep=""))
 }
