@@ -1,0 +1,13 @@
+Sprs_0210,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,413,416,HDEL
+Sprs_0395,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,589,592,REEL
+Sprs_0996,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,585,588,KDEL
+Sprs_2701,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,395,398,KDEL
+Sprs_2999,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,1661,1664,HDEL
+Sprs_3165,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,534,537,HDEL
+Sprs_3501,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,612,615,RDEL
+Sprs_3660,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,384,387,HEEL
+Sprs_5897,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,913,916,HEEL
+Sprs_5944,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,686,689,HDEL
+Sprs_5994,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,210,213,KDEL
+Sprs_6606,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,500,503,HEEL
+

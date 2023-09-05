@@ -1,0 +1,14 @@
+Mepe_0806,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,500,503,HEEL
+Mepe_1003,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,908,911,HEEL
+Mepe_1052,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,686,689,HDEL
+Mepe_1104,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,209,212,KDEL
+Mepe_1601,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,466,469,HNEL
+Mepe_1773,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,391,394,KEEL
+Mepe_2092,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,1650,1653,HDEL
+Mepe_5057,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,587,590,RQEL
+Mepe_5416,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,400,403,HDEL
+Mepe_5692,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,315,318,AEEL
+Mepe_6134,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,539,542,HDEL
+Mepe_6594,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,383,386,HQEL
+Mepe_6836,PS00014,ER_TARGET,Endoplasmic reticulum targeting sequence,593,596,KDEL
+
